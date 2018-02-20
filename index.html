@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  סכום התחלתי
+  <input type="text" id="startWith" value="10">
+  </br>
+  מכפיל
+  <input type="text" id="multiply" value="2">
+  </br>
+  איטרציות
+  <input type="text" id="iterations" value="10">
+  </br>
+
+  <button onclick="myFunction()">חשב</button>
+</br>
+  <textarea name="" id="log" cols="100" rows="30"></textarea>
+  <script>
+    function myFunction() {
+      document.getElementById("log").value = '';
+      let currentSpent;
+      let startWith = parseInt(document.getElementById("startWith").value);
+      const multiply = parseInt(document.getElementById("multiply").value);
+      let totalSpent = 0;
+      const iterations = parseInt(document.getElementById("iterations").value);
+
+      let isFirst = true;
+      for (i = 1; i <= iterations; i++) {
+        if (isFirst) {
+          currentSpent = startWith;
+          isFirst = false;
+        } else {
+          currentSpent = Math.round(currentSpent * multiply);
+        }
+
+        totalSpent += currentSpent;
+        const earn = Math.round(currentSpent * 2.7);
+        const message = `spending ${currentSpent} with total ${totalSpent}, can earn neto ${earn - totalSpent}(${earn})\n`;
+        document.getElementById("log").value = document.getElementById("log").value + message;
+        console.log(message);
+      }
+    }
+  </script>
+
+</body>
+
+</html>
