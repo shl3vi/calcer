@@ -19,10 +19,10 @@
     function myFunction() {
       document.getElementById("log").value = '';
       let currentSpent;
-      let startWith = parseInt(document.getElementById("startWith").value);
-      const multiply = parseInt(document.getElementById("multiply").value);
+      let startWith = parseFloat(document.getElementById("startWith").value);
+      const multiply = parseFloat(document.getElementById("multiply").value);
       let totalSpent = 0;
-      const iterations = parseInt(document.getElementById("iterations").value);
+      const iterations = parseFloat(document.getElementById("iterations").value);
 
       let isFirst = true;
       for (i = 1; i <= iterations; i++) {
