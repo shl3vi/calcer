@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Asshole</title>
+  <link rel="stylesheet" href="board.css">
+  <!-- <script src="game.js"/> -->
+</head>
+<script>
+  let game;
+
+  function choosePlayer(playerId) {
+    const playerElement = document.getElementById(playerId);
+    game.onPlayerClicked(playerId);
+  }
+
+  function revert() {
+    game.revertState();
+  }
+
+  function getPlayersInBoard(players) {
+    let playersHtml = '';
+
+    players.forEach(function (player, index) {
+      const n = index + 1;
+      playersHtml += `<div onclick="choosePlayer('player${n}')" id="player${n}" class="playerInBoard rows${players.length}">
+        <span  class="name">${player.name}</span><span  class="score">0</span><span  class="fromNext">0</span>
+        </div>`
+    });
+
+    return playersHtml;
+  }
+
+  function onRefreshBoardEvent(currentState, players) {
+    const stateAsArray = Object.keys(currentState).map(function (key) {
+      return Object.assign({ id: key }, currentState[key]);
+    });
+    stateAsArray.sort(function (a, b) {
+      if (a.score < b.score) return 1;
+      if (a.score > b.score) return -1;
+      return 0;
+    })
+
+    while (board.firstChild) {
+      board.removeChild(board.firstChild);
+    }
+
+    let boardInnerHtml = '<button onclick="revert()">חזור</button>';
+    stateAsArray.forEach(function (state, i) {
+      let matchingPlayer = null;
+      let diff = '-';
+      let nextPlayerId = stateAsArray.length !== i + 1 && stateAsArray[i + 1].id;
+
+      players.forEach((player) => {
+        if (player.id === state.id) {
+          matchingPlayer = player;
+        }
+      });
+
+      if (nextPlayerId) {
+        players.forEach((player) => {
+          if (player.id === nextPlayerId) {
+            diff = '+' + (parseInt(state.score) - parseInt(stateAsArray[i + 1].score));
+          }
+        });
+      }
+
+      boardInnerHtml += `<div onclick="choosePlayer('${matchingPlayer.id}')" id="${matchingPlayer.id}" class="playerInBoard rows${players.length} ${state.clicked && 'chosen'}">
+        <span  class="name">${matchingPlayer.name}</span><span  class="score">${state.score}</span><span  class="fromNext">${diff}</span>
+        </div>`;
+    });
+
+    board.innerHTML += boardInnerHtml;
+  }
+
+  function gotPlayers() {
+    const player1 = document.getElementById('1').value;
+    const player2 = document.getElementById('2').value;
+    const player3 = document.getElementById('3').value;
+    const player4 = document.getElementById('4').value;
+    const player5 = document.getElementById('5').value;
+    const player6 = document.getElementById('6').value;
+
+    if (!player1 || !player2 || !player3 || !player4 || !player5) {
+      return alert('at least 5 players!');
+    }
+
+    const players = [
+      { id: 'player1', name: player1 },
+      { id: 'player2', name: player2 },
+      { id: 'player3', name: player3 },
+      { id: 'player4', name: player4 },
+      { id: 'player5', name: player5 },
+    ];
+    if (player6) {
+      players.push({ id: 'player6', name: player6 }, );
+    }
+
+    const container = document.getElementById('container');
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    const board = document.getElementById('board');
+
+    board.innerHTML = getPlayersInBoard(players);
+
+    container.appendChild(board);
+    game = new Game(players, onRefreshBoardEvent);
+  }
+
+  class Game {
+
+    constructor(players, refreshBoardEvent) {
+      this.players = players;
+      this.maxPoints = players.length;
+      this.prevScores = [];
+
+      this.currentScores = {};
+      players.forEach((player) => {
+        this.currentScores[player.id] = {};
+        this.currentScores[player.id].score = 0;
+      });
+
+      this.prevScores.push(this.cloneScores());
+      this.currentClickedScore = players.length;
+      this.refreshBoardEvent = refreshBoardEvent;
+    }
+
+    revertState() {
+      if (this.prevScores.length > 0) {
+        if (this.prevScores.length === 1) {
+          this.currentScores = this.toCurrentScores(this.prevScores[0]);
+        } else {
+          this.currentScores = this.toCurrentScores(this.prevScores.pop());
+        }
+        this.resetClicks();
+        this.currentClickedScore = this.maxPoints;
+        this.refreshBoardEvent(this.currentScores, this.players);
+        return;
+      }
+      return alert('no more prev states');
+    }
+
+    resetClicks() {
+      this.players.forEach((player) => {
+        this.currentScores[player.id].clicked = false;
+      });
+    }
+
+    onPlayerClicked(playerId) {
+      if (!this.currentScores[playerId].clicked) {
+        this.calculatePlayerScore(playerId);
+      }
+
+      return this.currentScores;
+    }
+
+    calculatePlayerScore(playerId) {
+      this.currentScores[playerId].score += this.currentClickedScore;
+      this.currentScores[playerId].clicked = true;
+
+      this.refreshBoardEvent(this.currentScores, this.players);
+
+      this.currentClickedScore--;
+      if (this.currentClickedScore === 0) {
+        this.finishRound();
+      }
+    }
+
+    cloneScores() {
+      const newCurrentScores = {};
+      this.players.forEach((player) => {
+        newCurrentScores[player.id] = {};
+        newCurrentScores[player.id].score = this.currentScores[player.id].score;
+      });
+      return newCurrentScores;
+    }
+
+    toCurrentScores(from) {
+      const newCurrentScores = {};
+      this.players.forEach((player) => {
+        newCurrentScores[player.id] = {};
+        newCurrentScores[player.id].score = from[player.id].score;
+      });
+      return newCurrentScores;
+    }
+
+    finishRound() {
+      this.prevScores.push(this.cloneScores());
+
+      this.currentScores = this.toCurrentScores(this.currentScores);
+
+      this.resetClicks();
+      this.currentClickedScore = this.maxPoints;
+    }
+  }
+</script>
+
+<body>
+  <div id='container'>
+    <div dir="rtl">
+      <label>
+        <input type="text" value="מוטי" id='1'> שחקן 1
+      </label>
+      <br>
+      <label>
+        <input type="text" value="נתן" id='2'> שחקן 2
+      </label>
+      <br>
+      <label>
+        <input type="text" value="אופיר" id='3'> שחקן 3
+      </label>
+      <br>
+      <label>
+        <input type="text" value="שחר" id='4'> שחקן 4
+      </label>
+      <br>
+      <label>
+        <input type="text" value="איתי" id='5'> שחקן 5
+      </label>
+      <br>
+      <label>
+        <input type="text" id='6'> שחקן 6
+      </label>
+      <br>
+      <button onClick="gotPlayers()">אישור</button>
+    </div>
+  </div>
+  <div id='board'>
+  </div>
+</body>
+
+</html>
