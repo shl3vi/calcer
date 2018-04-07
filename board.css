@@ -1,0 +1,61 @@
+body, html{
+  height: 100%;
+}
+
+#board{
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+#board .off{
+  display: none;
+}
+
+.playerInBoard {
+  background-color: #fff;
+}
+
+.playerInBoard.chosen {
+  background-color: lightgreen;
+}
+
+.playerInBoard.rows5 {
+  height: 20%;
+  border: 1px solid;
+}
+
+.playerInBoard.rows6 {
+  height: 16%;
+  border: 1px solid;
+}
+
+#container {
+  background: lightblue;
+  height: 100%;
+}
+
+.name, .score, .fromNext {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  height: 100%;
+  font: 10em "Open Sans", sans-serif;
+}
+
+.name{
+  width: 50%;
+}
+
+.score {
+  color: red;
+  border-left: solid 1px black;
+  width: 23%;
+}
+
+.fromNext {
+  border-left: solid 1px;
+  width: 20%;
+  font: 7em "Open Sans", sans-serif;
+}
